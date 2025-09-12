@@ -1,16 +1,28 @@
 import React from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { ShoppingCart, Users, Menu } from 'lucide-react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { ShoppingCart, Users, Menu, Package } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import ThemeToggle from './ThemeToggle'
 
 const Navigation = () => {
   const location = useLocation()
+  const navigate = useNavigate()
   const { getTotalItems } = useCart()
   const totalItems = getTotalItems()
 
+  const handleTrackOrderClick = (e) => {
+    e.preventDefault()
+    const currentOrderId = localStorage.getItem('currentOrderId')
+    if (currentOrderId) {
+      navigate(`/order/${currentOrderId}`)
+    } else {
+      navigate('/track-order')
+    }
+  }
+
   const navItems = [
     { path: '/menu', name: 'Menu', icon: Menu },
+    { path: '/track-order', name: 'Track Order', icon: Package, onClick: handleTrackOrderClick },
     { path: '/cart', name: 'Cart', icon: ShoppingCart, badge: totalItems > 0 ? totalItems : null }
     // Dashboard removed - admin access only
   ]
@@ -32,27 +44,55 @@ const Navigation = () => {
           {/* Navigation Items */}
           <div className="flex items-center space-x-2">
             <div className="flex space-x-1">
-              {navItems.map(({ path, name, icon: Icon, badge }) => (
-                <Link
-                  key={path}
-                  to={path}
-                  className={`relative flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 group hover:scale-105 ${
-                    location.pathname === path
-                      ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/25 dark:shadow-primary-400/25'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-dark-700/50'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span className="hidden sm:block">{name}</span>
-                  {badge && (
-                    <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-lg animate-pulse">
-                      {badge}
-                    </span>
-                  )}
-                  {/* Hover glow effect */}
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/10 to-primary-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-                </Link>
-              ))}
+              {navItems.map(({ path, name, icon: Icon, badge, onClick }) => {
+                const isActive = location.pathname === path || (name === 'Track Order' && location.pathname.startsWith('/order/'))
+                
+                if (onClick) {
+                  return (
+                    <button
+                      key={path}
+                      onClick={onClick}
+                      className={`relative flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 group hover:scale-105 ${
+                        isActive
+                          ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/25 dark:shadow-primary-400/25'
+                          : 'text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-dark-700/50'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="hidden sm:block">{name}</span>
+                      {badge && (
+                        <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-lg animate-pulse">
+                          {badge}
+                        </span>
+                      )}
+                      {/* Hover glow effect */}
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/10 to-primary-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+                    </button>
+                  )
+                }
+                
+                return (
+                  <Link
+                    key={path}
+                    to={path}
+                    className={`relative flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 group hover:scale-105 ${
+                      isActive
+                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/25 dark:shadow-primary-400/25'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-dark-700/50'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="hidden sm:block">{name}</span>
+                    {badge && (
+                      <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-lg animate-pulse">
+                        {badge}
+                      </span>
+                    )}
+                    {/* Hover glow effect */}
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500/10 to-primary-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+                  </Link>
+                )
+              })}
             </div>
             
             {/* Theme Toggle */}

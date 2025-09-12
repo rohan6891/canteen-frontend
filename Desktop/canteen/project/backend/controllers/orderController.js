@@ -21,7 +21,7 @@ const createOrder = async (req, res) => {
       if (!menuItem) {
         return res.status(404).json({ message: `Menu item not found: ${item.menuItemId}` });
       }
-      if (!menuItem.isAvailable) {
+      if (!menuItem.isAvailable && !menuItem.available) {
         return res.status(400).json({ message: `Item not available: ${menuItem.name}` });
       }
 

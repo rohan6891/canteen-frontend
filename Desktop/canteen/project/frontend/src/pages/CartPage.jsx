@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Trash2, Plus, Minus, ShoppingBag, User, CreditCard } from 'lucide-react'
+import { Trash2, Plus, Minus, ShoppingBag, User, CreditCard, Package } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { orderAPI } from '../services/api'
 import BillDownload from '../components/BillDownload'
+import PaymentSuccessPopup from '../components/PaymentSuccessPopup'
 import { RAZORPAY_CONFIG, loadRazorpayScript } from '../config/razorpay'
 
 const CartPage = () => {
@@ -12,6 +13,8 @@ const CartPage = () => {
   const [loading, setLoading] = useState(false)
   const [showBillDownload, setShowBillDownload] = useState(false)
   const [completedOrder, setCompletedOrder] = useState(null)
+  const [showPaymentSuccessPopup, setShowPaymentSuccessPopup] = useState(false)
+  const [paymentData, setPaymentData] = useState(null)
   const [customerInfo, setCustomerInfo] = useState({
     studentName: '',
     mobileNumber: '',
@@ -65,6 +68,8 @@ const CartPage = () => {
         const response = await orderAPI.create(orderData)
         
         if (response.data.success) {
+          // Store order ID in localStorage for tracking
+          localStorage.setItem('currentOrderId', response.data.order.orderId)
           clearCart()
           navigate('/order-success', { state: { order: response.data.order } })
         }
@@ -103,12 +108,20 @@ const CartPage = () => {
               const orderResponse = await orderAPI.create(orderDataWithPayment)
               
               if (orderResponse.data.success) {
+                // Store order ID in localStorage for tracking
+                localStorage.setItem('currentOrderId', orderResponse.data.order.orderId)
                 clearCart()
                 navigate('/order-success', { state: { order: orderResponse.data.order } })
               }
             } catch (error) {
               console.error('Order creation error:', error)
-              alert('Payment successful but order creation failed. Please contact support.')
+              // Show popup with receipt download option
+              setShowPaymentSuccessPopup(true)
+              setPaymentData({
+                paymentId: response.razorpay_payment_id,
+                orderData: orderDataWithPayment,
+                error: error.response?.data?.message || 'Order creation failed'
+              })
             }
           },
           modal: {
@@ -163,9 +176,24 @@ const CartPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 animate-fade-in">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 dark:from-primary-400 dark:to-primary-300 bg-clip-text text-transparent mb-4">Your Cart</h1>
-        <p className="text-gray-600 dark:text-gray-300 text-lg">Review your order and proceed to checkout</p>
+      <div className="flex items-center justify-between mb-12">
+        {/* Track Order Button - Left Side */}
+        <button
+          onClick={() => navigate('/track-order')}
+          className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+        >
+          <Package className="w-5 h-5" />
+          <span>Track Order</span>
+        </button>
+        
+        {/* Header - Center */}
+        <div className="text-center flex-1 mx-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 dark:from-primary-400 dark:to-primary-300 bg-clip-text text-transparent mb-2">Your Cart</h1>
+          <p className="text-gray-600 dark:text-gray-300 text-lg">Review your order and proceed to checkout</p>
+        </div>
+        
+        {/* Spacer for balance */}
+        <div className="w-32"></div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -348,6 +376,13 @@ const CartPage = () => {
           onClose={handleCloseBillDownload}
         />
       )}
+      
+      {/* Payment Success Popup */}
+      <PaymentSuccessPopup 
+        isOpen={showPaymentSuccessPopup}
+        onClose={() => setShowPaymentSuccessPopup(false)}
+        paymentData={paymentData}
+      />
     </div>
   )
 }

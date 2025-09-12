@@ -13,6 +13,13 @@ const OrderSuccessPage = () => {
     return null
   }
 
+  // Store the order ID in localStorage for easy tracking
+  React.useEffect(() => {
+    if (order && order.orderId) {
+      localStorage.setItem('currentOrderId', order.orderId)
+    }
+  }, [order])
+
   const handleDownloadBill = () => {
     // This will be handled by the BillDownload component
     const billDownload = document.querySelector('#bill-download')

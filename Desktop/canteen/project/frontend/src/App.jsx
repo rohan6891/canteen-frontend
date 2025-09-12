@@ -4,6 +4,7 @@ import MenuPage from './pages/MenuPage'
 import CartPage from './pages/CartPage'
 import OrderSuccessPage from './pages/OrderSuccessPage'
 import OrderStatusPage from './pages/OrderStatusPage'
+import TrackOrderPage from './pages/TrackOrderPage'
 import DashboardPage from './pages/DashboardPage'
 import AdminLoginPage from './pages/AdminLoginPage'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -24,6 +25,7 @@ function App() {
                 <Route path="/" element={<MenuPage />} />
                 <Route path="/menu" element={<MenuPage />} />
                 <Route path="/cart" element={<CartPage />} />
+                <Route path="/track-order" element={<TrackOrderPage />} />
                 <Route path="/order-success" element={<OrderSuccessPage />} />
                 <Route path="/order/:orderId" element={<OrderStatusPage />} />
                 <Route path="/admin/login" element={<AdminLoginPage />} />

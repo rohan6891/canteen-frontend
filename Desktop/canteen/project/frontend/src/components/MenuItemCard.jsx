@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { Plus, Minus, ShoppingCart } from 'lucide-react'
+import { Plus, Minus, ShoppingCart, Info, X } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 
 const MenuItemCard = ({ item }) => {
   const [quantity, setQuantity] = useState(1)
+  const [showInfoModal, setShowInfoModal] = useState(false)
   const { addToCart } = useCart()
 
   const handleAddToCart = () => {
@@ -52,11 +53,20 @@ const MenuItemCard = ({ item }) => {
       </div>
       
       <div className="relative space-y-4">
-        {/* Title */}
-        <div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 line-clamp-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-300">
+        {/* Title and Info Button */}
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 line-clamp-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-300 flex-1">
             {item.name}
           </h3>
+          {item.description && (
+            <button
+              onClick={() => setShowInfoModal(true)}
+              className="ml-2 p-2 rounded-full bg-primary-100 dark:bg-primary-900/30 hover:bg-primary-200 dark:hover:bg-primary-800/50 text-primary-600 dark:text-primary-400 transition-all duration-300 hover:scale-110 active:scale-95"
+              title="View full description"
+            >
+              <Info className="w-4 h-4" />
+            </button>
+          )}
         </div>
         
         {/* Description */}
@@ -122,6 +132,72 @@ const MenuItemCard = ({ item }) => {
           </div>
         )}
       </div>
+      
+      {/* Info Modal */}
+      {showInfoModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowInfoModal(false)}>
+          <div className="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-dark-600">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{item.name}</h3>
+              <button
+                onClick={() => setShowInfoModal(false)}
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-700 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto">
+              {/* Image */}
+              <div className="mb-4 rounded-xl overflow-hidden">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-full h-48 object-cover"
+                  onError={(e) => {
+                    e.target.src = 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg'
+                  }}
+                />
+              </div>
+              
+              {/* Description */}
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Description</h4>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {item.description}
+                  </p>
+                </div>
+                
+                {/* Additional Info */}
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-dark-600">
+                  <div>
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Price</span>
+                    <p className="text-lg font-bold text-primary-600 dark:text-primary-400">₹{item.price}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Prep Time</span>
+                    <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{item.preparationTime} min</p>
+                  </div>
+                </div>
+                
+                {/* Availability Status */}
+                <div className="pt-2">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                    item.isAvailable 
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' 
+                      : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                  }`}>
+                    {item.isAvailable ? '✓ Available' : '✗ Currently Unavailable'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

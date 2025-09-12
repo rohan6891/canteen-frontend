@@ -28,7 +28,6 @@ const orderItemSchema = new mongoose.Schema({
 const orderSchema = new mongoose.Schema({
   orderId: {
     type: String,
-    required: true,
     unique: true
   },
   studentName: {
@@ -77,14 +76,14 @@ const orderSchema = new mongoose.Schema({
 // Generate unique order ID
 orderSchema.pre('save', async function(next) {
   if (this.isNew) {
-    // Generate unique order number with date and random component
+    // Generate shorter, user-friendly order ID
     const now = new Date();
-    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
-    const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, ''); // HHMMSS
-    const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+    const randomNum = Math.floor(Math.random() * 999) + 1; // 1-999
     
-    // Format: CN-YYYYMMDD-HHMMSS-XXX (e.g., CN-20241201-143052-123)
-    this.orderId = `CN-${dateStr}-${timeStr}-${randomNum}`;
+    // Format: CN + day of year (3 digits) + random number (3 digits)
+    // Example: CN001234, CN365999 (max 8 characters)
+    this.orderId = `CN${dayOfYear.toString().padStart(3, '0')}${randomNum.toString().padStart(3, '0')}`;
     
     // Calculate estimated time (sum of preparation times + 5 minutes buffer)
     const totalPrepTime = this.items.reduce((total, item) => total + 10, 0); // Default 10 min per item

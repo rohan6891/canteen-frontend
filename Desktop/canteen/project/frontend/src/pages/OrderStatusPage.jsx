@@ -112,13 +112,13 @@ const OrderStatusPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <button
             onClick={() => navigate('/menu')}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
+            className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Back to Menu</span>
@@ -135,8 +135,8 @@ const OrderStatusPage = () => {
 
         {/* Order Status Timeline */}
         <div className="mb-8">
-          <div className="card p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Order Status</h2>
+          <div className="card dark:bg-dark-800 p-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Order Status</h2>
             
             <div className="flex items-center justify-between">
               {['Pending', 'In Progress', 'Ready', 'Completed'].map((status, index) => {
@@ -150,18 +150,18 @@ const OrderStatusPage = () => {
                         ? isCurrent 
                           ? 'bg-primary-600 text-white ring-4 ring-primary-200' 
                           : 'bg-primary-600 text-white'
-                        : 'bg-gray-200 text-gray-400'
+                        : 'bg-gray-200 dark:bg-gray-600 text-gray-400 dark:text-gray-300'
                     }`}>
                       {index + 1}
                     </div>
-                    <div className={`text-sm font-medium ${isActive ? 'text-primary-600' : 'text-gray-400'}`}>
+                    <div className={`text-sm font-medium ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500'}`}>
                       {status}
                     </div>
                     {index < 3 && (
                       <div className={`flex-1 h-1 mx-4 mt-4 ${
                         ['Pending', 'In Progress', 'Ready', 'Completed'].indexOf(order.status) > index 
                           ? 'bg-primary-600' 
-                          : 'bg-gray-200'
+                          : 'bg-gray-200 dark:bg-gray-600'
                       }`} />
                     )}
                   </div>
@@ -170,12 +170,12 @@ const OrderStatusPage = () => {
             </div>
             
             {order.status === 'Ready' && (
-              <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
                 <div className="flex items-center space-x-2">
                   <div className="text-2xl">🎉</div>
                   <div>
-                    <div className="font-semibold text-green-800">Your order is ready!</div>
-                    <div className="text-green-700">Please collect your order from the canteen counter.</div>
+                    <div className="font-semibold text-green-800 dark:text-green-300">Your order is ready!</div>
+                    <div className="text-green-700 dark:text-green-400">Please collect your order from the canteen counter.</div>
                   </div>
                 </div>
               </div>

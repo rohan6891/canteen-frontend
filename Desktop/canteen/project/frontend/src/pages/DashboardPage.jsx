@@ -23,6 +23,8 @@ const DashboardPage = () => {
     available: true,
     image: ''
   })
+  const [selectedImageFile, setSelectedImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState('')
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -116,17 +118,44 @@ const DashboardPage = () => {
     }))
   }
 
+  const handleImageFileChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setSelectedImageFile(file)
+      
+      // Create preview URL
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImagePreview(e.target.result)
+        setDishForm(prev => ({
+          ...prev,
+          image: e.target.result // Store base64 string
+        }))
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleAddDish = async (e) => {
     e.preventDefault()
     try {
-      const dishData = {
-        ...dishForm,
-        price: parseFloat(dishForm.price)
+      const formData = new FormData()
+      formData.append('name', dishForm.name)
+      formData.append('description', dishForm.description)
+      formData.append('price', parseFloat(dishForm.price))
+      formData.append('category', dishForm.category)
+      formData.append('preparationTime', 10)
+      
+      if (selectedImageFile) {
+        formData.append('image', selectedImageFile)
       }
-      await menuAPI.add(dishData)
+      
+      await menuAPI.add(formData)
       await fetchMenuItems()
       setShowAddDish(false)
       setDishForm({ name: '', description: '', price: '', category: '', available: true, image: '' })
+      setSelectedImageFile(null)
+      setImagePreview('')
       alert('Dish added successfully!')
     } catch (error) {
       console.error('Error adding dish:', error)
@@ -144,21 +173,32 @@ const DashboardPage = () => {
       available: dish.available,
       image: dish.image || ''
     })
+    setImagePreview(dish.image || '')
+    setSelectedImageFile(null)
     setShowAddDish(true)
   }
 
   const handleUpdateDish = async (e) => {
     e.preventDefault()
     try {
-      const dishData = {
-        ...dishForm,
-        price: parseFloat(dishForm.price)
+      const formData = new FormData()
+      formData.append('name', dishForm.name)
+      formData.append('description', dishForm.description)
+      formData.append('price', parseFloat(dishForm.price))
+      formData.append('category', dishForm.category)
+      formData.append('preparationTime', 10)
+      
+      if (selectedImageFile) {
+        formData.append('image', selectedImageFile)
       }
-      await menuAPI.update(editingDish._id, dishData)
+      
+      await menuAPI.update(editingDish._id, formData)
       await fetchMenuItems()
       setShowAddDish(false)
       setEditingDish(null)
       setDishForm({ name: '', description: '', price: '', category: '', available: true, image: '' })
+      setSelectedImageFile(null)
+      setImagePreview('')
       alert('Dish updated successfully!')
     } catch (error) {
       console.error('Error updating dish:', error)
@@ -179,10 +219,33 @@ const DashboardPage = () => {
     }
   }
 
+  const handleToggleAvailability = async (dishId, currentAvailability) => {
+    try {
+      const formData = new FormData()
+      const dish = menuItems.find(item => item._id === dishId)
+      
+      formData.append('name', dish.name)
+      formData.append('description', dish.description)
+      formData.append('price', dish.price)
+      formData.append('category', dish.category)
+      formData.append('preparationTime', dish.preparationTime || 10)
+      formData.append('available', !currentAvailability)
+      
+      await menuAPI.update(dishId, formData)
+      await fetchMenuItems()
+      alert(`Dish ${!currentAvailability ? 'marked as available' : 'marked as unavailable'}!`)
+    } catch (error) {
+      console.error('Error updating dish availability:', error)
+      alert('Failed to update dish availability. Please try again.')
+    }
+  }
+
   const cancelDishForm = () => {
     setShowAddDish(false)
     setEditingDish(null)
     setDishForm({ name: '', description: '', price: '', category: '', available: true, image: '' })
+    setSelectedImageFile(null)
+    setImagePreview('')
   }
 
   const calculateStats = () => {
@@ -453,10 +516,29 @@ const DashboardPage = () => {
                             {item.category}
                           </span>
                         </div>
+                        <div className="mb-3">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            item.available || item.isAvailable
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' 
+                              : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                          }`}>
+                            {item.available || item.isAvailable ? '✓ Available' : '✗ Unavailable'}
+                          </span>
+                        </div>
 
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleToggleAvailability(item._id, item.available || item.isAvailable)}
+                        className={`flex items-center gap-1 px-3 py-1 text-white text-sm rounded transition-colors duration-200 ${
+                          item.available || item.isAvailable
+                            ? 'bg-green-600 hover:bg-green-700'
+                            : 'bg-red-600 hover:bg-red-700'
+                        }`}
+                      >
+                        {item.available || item.isAvailable ? 'Available' : 'Unavailable'}
+                      </button>
                       <button
                         onClick={() => handleEditDish(item)}
                         className="flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors duration-200"
@@ -533,27 +615,41 @@ const DashboardPage = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Category
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="category"
                     value={dishForm.category}
                     onChange={handleDishFormChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
+                  >
+                    <option value="">Select a category</option>
+                    <option value="Beverages">Beverages</option>
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Snacks">Snacks</option>
+                    <option value="Desserts">Desserts</option>
+                    <option value="Dinner">Dinner</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Image URL
+                    Image Upload
                   </label>
                   <input
-                    type="url"
-                    name="image"
-                    value={dishForm.image}
-                    onChange={handleDishFormChange}
-                    placeholder="https://example.com/image.jpg"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageFileChange}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
                   />
+                  {imagePreview && (
+                    <div className="mt-2">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-32 h-32 object-cover rounded-md border border-gray-300 dark:border-gray-600"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center">
                   <input

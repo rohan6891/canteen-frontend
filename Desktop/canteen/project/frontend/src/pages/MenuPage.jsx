@@ -95,6 +95,7 @@ const MenuPage = () => {
         </div>
       </div>
 
+
       {/* Search and Filter */}
       <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 mb-12 animate-slide-up">
         {/* Search */}

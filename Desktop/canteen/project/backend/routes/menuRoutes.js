@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const upload = require('../middleware/upload');
 const {
   getAllMenuItems,
   addMenuItem,
@@ -13,11 +14,11 @@ router.get('/', getAllMenuItems);
 
 // @route   POST /api/menu
 // @desc    Add new menu item
-router.post('/', addMenuItem);
+router.post('/', upload.single('image'), addMenuItem);
 
 // @route   PUT /api/menu/:id
 // @desc    Update menu item
-router.put('/:id', updateMenuItem);
+router.put('/:id', upload.single('image'), updateMenuItem);
 
 // @route   DELETE /api/menu/:id
 // @desc    Delete menu item

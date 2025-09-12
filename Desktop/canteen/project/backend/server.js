@@ -28,6 +28,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
+
 // Socket.io middleware for routes
 app.use((req, res, next) => {
   req.io = io;

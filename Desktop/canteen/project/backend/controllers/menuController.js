@@ -24,10 +24,16 @@ const getAllMenuItems = async (req, res) => {
 // Add new menu item
 const addMenuItem = async (req, res) => {
   try {
-    const { name, description, price, category, image, preparationTime } = req.body;
+    const { name, description, price, category, preparationTime } = req.body;
 
     if (!name || !price || !category) {
       return res.status(400).json({ message: 'Name, price, and category are required' });
+    }
+
+    // Handle image upload
+    let imageUrl = 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg';
+    if (req.file) {
+      imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
     }
 
     const menuItem = new MenuItem({
@@ -35,7 +41,7 @@ const addMenuItem = async (req, res) => {
       description: description || '',
       price,
       category,
-      image: image || 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
+      image: imageUrl,
       preparationTime: preparationTime || 10
     });
 
@@ -57,6 +63,17 @@ const updateMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
+
+    // Handle image upload if new file is provided
+    if (req.file) {
+      updates.image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    }
+
+    // Handle availability field mapping (frontend sends 'available', backend uses 'isAvailable')
+    if (updates.available !== undefined) {
+      updates.isAvailable = updates.available === 'true' || updates.available === true;
+      delete updates.available;
+    }
 
     const menuItem = await MenuItem.findByIdAndUpdate(id, updates, { new: true });
     

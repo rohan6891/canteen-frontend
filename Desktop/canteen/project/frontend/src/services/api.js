@@ -13,8 +13,18 @@ const api = axios.create({
 // Menu API
 export const menuAPI = {
   getAll: (params = {}) => api.get('/menu', { params }),
-  add: (data) => api.post('/menu', data),
-  update: (id, data) => api.put(`/menu/${id}`, data),
+  add: (data) => {
+    const config = data instanceof FormData ? {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    } : {}
+    return api.post('/menu', data, config)
+  },
+  update: (id, data) => {
+    const config = data instanceof FormData ? {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    } : {}
+    return api.put(`/menu/${id}`, data, config)
+  },
   delete: (id) => api.delete(`/menu/${id}`)
 }
 

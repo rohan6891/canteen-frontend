@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Download, Receipt, CheckCircle, Clock, User, Hash } from 'lucide-react'
+import { orderAPI } from '../services/api'
 
 const BillDownload = ({ order, onClose }) => {
   const [isDownloading, setIsDownloading] = useState(false)
@@ -7,26 +8,18 @@ const BillDownload = ({ order, onClose }) => {
   const handleDownloadBill = async () => {
     setIsDownloading(true)
     try {
-      const response = await fetch(`http://localhost:5001/api/orders/${order.orderId}/receipt`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/pdf',
-        },
-      })
-
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `Bill_${order.orderId}.pdf`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        window.URL.revokeObjectURL(url)
-      } else {
-        throw new Error('Failed to download bill')
-      }
+      const response = await orderAPI.downloadReceipt(order.orderId || order._id)
+      
+      // Create blob and download
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `Bill_${order.orderId || order._id}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
     } catch (error) {
       console.error('Download error:', error)
       alert('Failed to download bill. Please try again.')
