@@ -1,0 +1,21 @@
+{
+  "name": "canteen-ordering-system",
+  "version": "1.0.0",
+  "description": "Full-stack canteen ordering system",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "server": "nodemon backend/server.js",
+    "client": "npm run dev --prefix frontend",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-backend": "npm install --prefix backend",
+    "install-frontend": "npm install --prefix frontend",
+    "install-all": "npm install && npm run install-backend && npm run install-frontend"
+  },
+  "keywords": ["canteen", "ordering", "react", "express", "mongodb"],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

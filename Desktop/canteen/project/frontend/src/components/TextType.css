@@ -1,0 +1,26 @@
+.text-type-cursor {
+  display: inline-block;
+  font-weight: inherit;
+  color: inherit;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.text-type-cursor {
+  animation: blink 1s infinite;
+}
+
+/* Optional: Smooth text rendering */
+.text-type-container {
+  font-feature-settings: 'kern' 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
