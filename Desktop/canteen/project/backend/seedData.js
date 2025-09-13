@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const MenuItem = require('./models/MenuItem');
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 
 const sampleMenuItems = [
   {

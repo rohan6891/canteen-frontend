@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { CheckCircle, Download, X, AlertTriangle, Receipt, User, Clock, CreditCard } from 'lucide-react'
-import { orderAPI } from '../services/api'
+import { orderAPI } from '../services/api';
 import jsPDF from 'jspdf'
 
 const PaymentSuccessPopup = ({ isOpen, onClose, paymentData }) => {
